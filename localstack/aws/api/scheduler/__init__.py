@@ -9,16 +9,19 @@ else:
 
 from localstack.aws.api import RequestContext, ServiceException, ServiceRequest, handler
 
+Boolean = bool
 CapacityProvider = str
 CapacityProviderStrategyItemBase = int
 CapacityProviderStrategyItemWeight = int
 ClientToken = str
+Date = datetime
 DeadLetterConfigArnString = str
 Description = str
 DetailType = str
 EnableECSManagedTags = bool
 EnableExecuteCommand = bool
 Group = str
+Integer = int
 KmsKeyArn = str
 MaxResults = int
 MaximumEventAgeInSeconds = int
@@ -479,7 +482,7 @@ class SchedulerApi:
         start_date: StartDate = None,
         state: ScheduleState = None,
     ) -> CreateScheduleOutput:
-        raise NotImplementedError
+       pass
 
     @handler("CreateScheduleGroup")
     def create_schedule_group(
@@ -539,7 +542,7 @@ class SchedulerApi:
         next_token: NextToken = None,
         state: ScheduleState = None,
     ) -> ListSchedulesOutput:
-        raise NotImplementedError
+        pass
 
     @handler("ListTagsForResource")
     def list_tags_for_resource(
@@ -578,3 +581,140 @@ class SchedulerApi:
         state: ScheduleState = None,
     ) -> UpdateScheduleOutput:
         raise NotImplementedError
+
+class SchedulerResult(TypedDict, total=False):
+    Arn                 : String
+    CreationDate        : String
+    GroupName           : Optional[String]
+    Arn                 : Optional[String]
+    CreationDate        : Optional[String]
+    GroupName           : Optional[String]
+    LastModificationDate: Optional[String]
+    Name                : String
+    State               : Boolean
+    Target              : Optional[Dict]
+
+SchedulerList = List[SchedulerResult]
+
+class ListSchedulesResult(TypedDict, total=False):
+    SchedulerList: Optional[SchedulerList]
+
+class CreateScheduleResult(TypedDict, total=False):
+    Arn: String
+
+class FlexibleTimeWindowModeType(str):
+    OFF         : "OFF"
+    FLEXIBLE    : "FLEXIBLE"
+
+class FlexibleTimeWindowType(TypedDict):
+    MaximumWindowInMinutes  : Integer
+    Mode                    : FlexibleTimeWindowModeType
+
+class StateType(str):
+    ENABLED     : 'ENABLED'
+    DISABLED    : 'DISABLED'
+
+class DeadLetterConfigType(str):
+        Arn : String
+
+class CapacityProviderStrategyType(TypedDict):
+    Base                : Integer
+    CapacityProvider    : String
+    Weight              : Integer
+
+class CLaunchType(str):
+    EC2         : 'EC2'
+    FARGATE     : 'FARGATE'
+    EXTERNAL    : 'EXTERNAL'
+
+class AwsvpcConfigurationType(TypedDict):
+    AssignPublicIp  : StateType
+    SecurityGroups  : List[String]
+    Subnets         : List[String]
+
+class NetworkConfigurationType(TypedDict):
+    AwsvpcConfiguration: AwsvpcConfigurationType
+
+class PlacementConstraintsTType(str):
+    D : 'distinctInstance'
+    M : 'memberOf'
+
+class PlacementConstraintsType(TypedDict):
+    Expression  : String
+    Type        : PlacementConstraintsTType
+
+class PlacementStrategyTType(str):
+    RANDOM  : 'random'
+    SPREAD  : 'spread'
+    BINPACK : 'binpack'
+
+class PlacementStrategyType(TypedDict):
+    field   : String
+    type    : PlacementStrategyTType
+
+class TagsType(TypedDict):
+   String : String
+
+
+class EcsParametersType(TypedDict):
+   CapacityProviderStrategy : List[CapacityProviderStrategyType]
+   EnableECSManagedTags     : Boolean
+   EnableExecuteCommand     : Boolean
+   Group                    : String
+   LaunchType               : CLaunchType
+   NetworkConfiguration     : NetworkConfigurationType
+   PlacementConstraints     : List[PlacementConstraintsType]
+   PlacementStrategy        : List[PlacementStrategyType]
+   PlatformVersion          : String
+   PropagateTags            : 'TASK_DEFINITION'
+   ReferenceId              : String
+   Tags                     : List[TagsType]
+   TaskCount                : Integer
+   TaskDefinitionArn        : String
+
+class EventBridgeParametersType(TypedDict):
+    DetailType  : String
+    Source      : String
+
+class KinesisParametersType(TypedDict):
+    PartitionKey : String
+
+class RetryPolicyType(TypedDict):
+    MaximumEventAgeInSeconds    : Integer
+    MaximumRetryAttempts        : Integer
+
+class PipelineParameterListType(TypedDict):
+    Name    : String
+    Value   : String
+
+class SageMakerPipelineParametersType(TypedDict):
+    PipelineParameterList: List[PipelineParameterListType]
+
+class SqsParametersType(TypedDict):
+    MessageGroupId : String
+
+class TargetType(TypedDict):
+    Arn                         : String
+    DeadLetterConfig            : DeadLetterConfigType
+    EcsParameters               : EcsParametersType
+    EventBridgeParameters       : EventBridgeParametersType
+    Input                       : String
+    KinesisParameters           : KinesisParametersType
+    RetryPolicy                 : RetryPolicyType
+    RoleArn                     : String
+    SageMakerPipelineParameters : SageMakerPipelineParametersType
+    SqsParameters               : SqsParametersType
+
+class CreateScheduleRequest(ServiceRequest):
+    ClientToken                 : String
+    Description                 : String
+    EndDate                     : Date
+    FlexibleTimeWindow          : FlexibleTimeWindowType
+    GroupName                   : String
+    KmsKeyArn                   : String
+    Name                        : String
+    ScheduleExpression          : String
+    ScheduleExpressionTimezone  : String
+    StartDate                   : Date
+    State                       : StateType
+    Target                      : TargetType
